@@ -8,13 +8,22 @@ interface Bond {
   anulRedRate: string;
 }
 
+interface TreasuryBondResponseItem {
+  TrsrBd: {
+    nm: string;
+    mtrtyDt: string;
+    untrRedVal: string;
+    anulRedRate: string;
+  };
+}
+
 const fetchBonds = async (): Promise<Bond[]> => {
   const res = await fetch(
     "/api-tesouro/json/br/com/b3/tesourodireto/service/api/treasurybondsinfo.json"
   );
   const data = await res.json();
   const bonds = data?.response?.TrsrBdTradgList || data?.TrsrBdTradgList || [];
-  return bonds.map((item: any) => {
+  return bonds.map((item: TreasuryBondResponseItem) => {
     const bond = item.TrsrBd;
     return {
       nomeTitulo: bond.nm,
@@ -31,6 +40,7 @@ const BondsTable: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [processed, setProcessed] = useState(false);
 
   useEffect(() => {
     fetchBonds()
@@ -66,6 +76,20 @@ const BondsTable: React.FC = () => {
           onChange={(e) => setSearchTerm(e.target.value)}
           className="block w-full rounded-lg border-gray-300 px-4 py-2 focus:border-blue-500 focus:ring-blue-500"
         />
+      </div>
+      <div className="mb-4 flex flex-wrap items-center gap-3">
+        <button
+          type="button"
+          onClick={() => setProcessed(true)}
+          className="rounded bg-red-600 px-4 py-2 font-semibold text-white shadow-sm transition hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+        >
+          Processar
+        </button>
+        {processed && (
+          <span className="text-sm font-medium text-green-700" role="status">
+            Processamento realizado com sucesso.
+          </span>
+        )}
       </div>
 
       <div className="overflow-x-auto rounded-lg border border-gray-200">
